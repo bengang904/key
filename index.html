@@ -194,14 +194,8 @@
     <div class="section active" id="step1">
         <label>第一步：设置你的私钥密码</label>
         <div class="input-group">
-            <input type="password" id="privateKey" placeholder="输入秘密字符串">
+            <input type="password" id="privateKey" placeholder="输入私钥">
             <button class="eye-btn" onclick="toggleEye('privateKey', this)">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>
-            </button>
-        </div>
-        <div class="input-group">
-            <input type="password" id="confirmKey" placeholder="再次确认秘密字符串">
-            <button class="eye-btn" onclick="toggleEye('confirmKey', this)">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>
             </button>
         </div>
@@ -211,7 +205,7 @@
     <div class="section" id="step2">
         <label>第二步：分享你的公钥给对方</label>
         <textarea id="publicKey" readonly></textarea>
-        <button class="copy-sub-btn" onclick="copyAndShowNext('publicKey')">复制公钥分享给对方</button>
+        <button class="copy-sub-btn" onclick="copyAndShowNext('publicKey', this)">复制公钥分享给对方</button>
 
         <div id="nextStepGroup">
             <label>第三步：输入对方发送给你的公钥</label>
@@ -223,11 +217,11 @@
     <div class="section" id="stepFinal">
         <label>你的公开密钥 (需要分享)</label>
         <textarea id="finalMyPublic" style="opacity: 0.6; min-height: 60px;" readonly></textarea>
-        <button class="copy-sub-btn" onclick="copyText('finalMyPublic')">复制并分享公钥</button>
+        <button class="copy-sub-btn" onclick="copyText('finalMyPublic', this)">复制并分享公钥</button>
         
         <label class="success-label" style="margin-top: 1.5rem;">最终密钥 (绝对保密) 不允许分享</label>
         <textarea id="sharedKey" class="result-box" readonly></textarea>
-        <button class="copy-sub-btn" style="color: var(--success-color); border-color: var(--success-color);" onclick="copyText('sharedKey')">复制最终密钥</button>
+        <button class="copy-sub-btn" style="color: var(--success-color); border-color: var(--success-color);" onclick="copyText('sharedKey', this)">复制最终密钥</button>
         
         <button class="action-btn" style="background-color: var(--accent-bg); color: var(--text-muted); margin-top: 30px;" onclick="location.reload()">清除并重新开始</button>
     </div>
@@ -251,19 +245,19 @@ function toggleEye(id, btn) {
     }
 }
 
-function copyText(id) {
-    const el = document.getElementById(id);
-    if (!el.value) return;
-    el.select();
-    el.setSelectionRange(0, 99999);
-    document.execCommand("copy");
-    const originalText = event.target.innerText;
-    event.target.innerText = "已复制 √";
-    setTimeout(() => { event.target.innerText = originalText; }, 1500);
+function copyText(id, btn) {
+    const val = document.getElementById(id).value;
+    if (!val) return;
+    
+    navigator.clipboard.writeText(val).then(() => {
+        const originalText = btn.innerText;
+        btn.innerText = "已复制 √";
+        setTimeout(() => { btn.innerText = originalText; }, 1500);
+    });
 }
 
-function copyAndShowNext(id) {
-    copyText(id);
+function copyAndShowNext(id, btn) {
+    copyText(id, btn);
     document.getElementById("nextStepGroup").style.display = "block";
 }
 
@@ -287,9 +281,7 @@ function modPow(base, exp, mod){
 
 async function generatePublic(){
     const k1 = document.getElementById("privateKey").value;
-    const k2 = document.getElementById("confirmKey").value;
     if(!k1) { alert("私钥不能为空"); return; }
-    if(k1 !== k2) { alert("两次输入的私钥不一致"); return; }
     const priv = await hashToBigInt(k1);
     const pub = modPow(g, priv, p);
     document.getElementById("publicKey").value = pub.toString();
