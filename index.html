@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SECURE KEY EXCHANGE</title>
+    <title>安全密钥交换</title>
     <style>
         :root {
             --primary-color: #60a5fa;
@@ -51,7 +51,7 @@
         }
 
         .section {
-            margin-bottom: 1.5rem;
+            margin-bottom: 2rem;
             display: none;
         }
 
@@ -65,63 +65,70 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        .label-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 0.5rem;
-        }
-
         label {
+            display: block;
             font-size: 0.75rem;
             font-weight: 700;
             color: var(--text-muted);
             text-transform: uppercase;
             letter-spacing: 0.1em;
+            margin-bottom: 0.75rem;
         }
 
         .success-label {
             color: var(--success-color);
-            font-size: 0.8rem;
-        }
-
-        .copy-btn {
-            background: none;
-            border: none;
-            color: var(--primary-color);
-            font-size: 0.7rem;
-            font-weight: 700;
-            cursor: pointer;
-            text-transform: uppercase;
-            padding: 0;
-        }
-
-        .input-group {
-            position: relative;
-            display: flex;
-            align-items: center;
         }
 
         input, textarea {
             width: 100%;
             box-sizing: border-box;
             border: 1px solid var(--border-color);
-            border-radius: 0;
+            border-radius: 4px;
             padding: 12px;
             font-size: 0.9rem;
             font-family: "JetBrains Mono", monospace;
             background-color: var(--input-bg);
             color: var(--text-main);
+            transition: all 0.2s ease;
         }
 
         input:focus, textarea:focus {
             outline: none;
             border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(96, 165, 250, 0.2);
+        }
+
+        textarea::-webkit-scrollbar {
+            width: 6px;
+        }
+        textarea::-webkit-scrollbar-track {
+            background: var(--bg-color);
+        }
+        textarea::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 10px;
+        }
+        textarea::-webkit-scrollbar-thumb:hover {
+            background: var(--text-muted);
+        }
+
+        textarea {
+            resize: none;
+            min-height: 80px;
+            background-color: var(--accent-bg);
+            line-height: 1.5;
+        }
+
+        .input-group {
+            position: relative;
+            margin-bottom: 10px;
         }
 
         .eye-btn {
             position: absolute;
             right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
             background: none;
             border: none;
             color: var(--text-muted);
@@ -136,34 +143,46 @@
             color: #000;
             border: none;
             padding: 14px;
-            border-radius: 0;
             font-size: 0.85rem;
             font-weight: 800;
             cursor: pointer;
-            margin-top: 0.5rem;
+            margin-top: 10px;
             text-transform: uppercase;
-            letter-spacing: 0.15em;
+            letter-spacing: 0.1em;
+            transition: background 0.2s;
         }
 
-        textarea {
-            resize: none;
-            min-height: 50px;
-            background-color: var(--accent-bg);
+        button.action-btn:active {
+            background-color: var(--primary-hover);
+        }
+
+        .copy-sub-btn {
+            width: 100%;
+            background: var(--border-color);
+            color: var(--primary-color);
+            border: 1px solid var(--border-color);
+            padding: 8px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            cursor: pointer;
+            margin-top: 5px;
+            text-transform: uppercase;
         }
 
         .result-box {
-            background-color: #020617;
             border: 1px solid var(--success-color);
             color: var(--success-color);
-            min-height: 80px;
+            background-color: rgba(34, 197, 94, 0.05);
+        }
+
+        #nextStepGroup {
+            display: none;
+            margin-top: 1.5rem;
+            animation: fadeIn 0.4s ease-out;
         }
 
         @media (max-width: 480px) {
-            .container {
-                padding: 1.5rem;
-                width: calc(100% - 32px);
-                margin: 16px;
-            }
+            .container { padding: 1.5rem; }
         }
     </style>
 </head>
@@ -173,49 +192,50 @@
     <h2 id="mainTitle">安全密钥交换</h2>
 
     <div class="section active" id="step1">
-        <label>设置你的私钥，一定要记住</label>
-        <div class="input-group" style="margin-top: 8px;">
-            <input type="password" id="privateKey" placeholder="输入私钥字符串">
+        <label>第一步：设置你的私钥密码</label>
+        <div class="input-group">
+            <input type="password" id="privateKey" placeholder="输入秘密字符串">
             <button class="eye-btn" onclick="toggleEye('privateKey', this)">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>
             </button>
         </div>
-        <div class="input-group" style="margin-top: 8px;">
-            <input type="password" id="confirmKey" placeholder="确认私钥字符串">
+        <div class="input-group">
+            <input type="password" id="confirmKey" placeholder="再次确认秘密字符串">
             <button class="eye-btn" onclick="toggleEye('confirmKey', this)">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>
             </button>
         </div>
-        <button class="action-btn" onclick="generatePublic()">生成公开密钥</button>
+        <button class="action-btn" onclick="generatePublic()">生成我的公钥</button>
     </div>
 
     <div class="section" id="step2">
-        <div class="label-row">
-            <label>请分享您的公钥给对方</label>
-            <button class="copy-btn" onclick="copyText('publicKey')">复制</button>
-        </div>
+        <label>第二步：分享你的公钥给对方</label>
         <textarea id="publicKey" readonly></textarea>
-    </div>
+        <button class="copy-sub-btn" onclick="copyAndShowNext('publicKey')">复制公钥分享给对方</button>
 
-    <div class="section" id="step3">
-        <label>输入对方公钥</label>
-        <textarea id="peerKey" style="background-color: var(--input-bg); border-color: var(--border-color);" placeholder="粘贴对方发送的公钥"></textarea>
-        <button class="action-btn" onclick="computeShared()">计算最终密钥</button>
+        <div id="nextStepGroup">
+            <label>第三步：输入对方发送给你的公钥</label>
+            <textarea id="peerKey" style="background-color: var(--input-bg);" placeholder="在此粘贴对方的公钥数字"></textarea>
+            <button class="action-btn" onclick="computeShared()">计算最终加密密钥</button>
+        </div>
     </div>
 
     <div class="section" id="stepFinal">
-        <div class="label-row">
-            <label class="success-label">请保管好你的最终生成密钥</label>
-            <button class="copy-btn" onclick="copyText('sharedKey')">复制</button>
-        </div>
+        <label>你的公开密钥 (需要分享)</label>
+        <textarea id="finalMyPublic" style="opacity: 0.6; min-height: 60px;" readonly></textarea>
+        <button class="copy-sub-btn" onclick="copyText('finalMyPublic')">复制并分享公钥</button>
+        
+        <label class="success-label" style="margin-top: 1.5rem;">最终密钥 (绝对保密) 不允许分享</label>
         <textarea id="sharedKey" class="result-box" readonly></textarea>
-        <button class="action-btn" style="background-color: var(--border-color); color: var(--text-muted); margin-top: 20px;" onclick="location.reload()">重新开始</button>
+        <button class="copy-sub-btn" style="color: var(--success-color); border-color: var(--success-color);" onclick="copyText('sharedKey')">复制最终密钥</button>
+        
+        <button class="action-btn" style="background-color: var(--accent-bg); color: var(--text-muted); margin-top: 30px;" onclick="location.reload()">清除并重新开始</button>
     </div>
 </div>
 
 <script>
-const p = BigInt("0xFFFFFFFFFFFFFFFFC90FDAA22168C234C4C6628B80DC1CD1");
-const g = 5n;
+const p = BigInt("0xFFFFFFFFFFFFFFFFC90FDAA22168C234C4C6628B80DC1CD129024E088A67CC74020BBEA63B139B22514A08798E3404DDEF9519B3CD3A431B302B0A6DF25F14374FE1356D6D51C245E485B576625E7EC6F44C42E9A637ED6B0BFF5CB6F406B7EDEE386BFB5A899FA5AE9F24117C4B1FE649286651ECE45B3DC2007CB8A163BF0598DA48361C55D39A69163FA8FD24CF5F83655D23DCA3AD961C62F356208552BB9ED529077096966D670C354E4ABC9804F1746C08CA18217C32905E462E36CE3BE39E055872739302406A5123E163283B1910E63345839401ED59A0300E99A7EE136923C9341F287E9AD5199C50B34509F5F9419159146522F85B06456C361712A62174ED03036E73D541C1026D73");
+const g = 2n;
 
 const eyeOpenPath = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>`;
 const eyeClosedPath = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>`;
@@ -235,8 +255,16 @@ function copyText(id) {
     const el = document.getElementById(id);
     if (!el.value) return;
     el.select();
+    el.setSelectionRange(0, 99999);
     document.execCommand("copy");
-    alert("已复制到剪贴板");
+    const originalText = event.target.innerText;
+    event.target.innerText = "已复制 √";
+    setTimeout(() => { event.target.innerText = originalText; }, 1500);
+}
+
+function copyAndShowNext(id) {
+    copyText(id);
+    document.getElementById("nextStepGroup").style.display = "block";
 }
 
 async function hashToBigInt(str){
@@ -265,8 +293,8 @@ async function generatePublic(){
     const priv = await hashToBigInt(k1);
     const pub = modPow(g, priv, p);
     document.getElementById("publicKey").value = pub.toString();
+    document.getElementById("step1").style.display = "none";
     document.getElementById("step2").classList.add("active");
-    document.getElementById("step3").classList.add("active");
 }
 
 async function computeShared(){
@@ -280,14 +308,14 @@ async function computeShared(){
         const enc = new TextEncoder().encode(shared.toString());
         const hash = await crypto.subtle.digest("SHA-256", enc);
         const key = [...new Uint8Array(hash)].map(x=>x.toString(16).padStart(2, "0")).join("");
+        
+        document.getElementById("finalMyPublic").value = document.getElementById("publicKey").value;
         document.getElementById("sharedKey").value = key;
         
-        document.getElementById("step1").style.display = "none";
         document.getElementById("step2").style.display = "none";
-        document.getElementById("step3").style.display = "none";
-        document.getElementById("mainTitle").innerText = "密钥生成完毕";
+        document.getElementById("mainTitle").innerText = "密钥交换完成";
         document.getElementById("stepFinal").classList.add("active");
-    } catch (e) { alert("公钥格式错误"); }
+    } catch (e) { alert("公钥格式错误，请确保输入的是纯数字"); }
 }
 </script>
 
