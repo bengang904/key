@@ -19,7 +19,7 @@
         }
 
         body {
-            font-family: "Inter", -apple-system, "SF Pro SC", "HanHei SC", sans-serif;
+            font-family: "Inter", -apple-system, sans-serif;
             background-color: var(--bg-color);
             color: var(--text-main);
             margin: 0;
@@ -61,8 +61,14 @@
         }
 
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         label {
@@ -96,20 +102,6 @@
             outline: none;
             border-color: var(--primary-color);
             box-shadow: 0 0 0 2px rgba(96, 165, 250, 0.2);
-        }
-
-        textarea::-webkit-scrollbar {
-            width: 6px;
-        }
-        textarea::-webkit-scrollbar-track {
-            background: var(--bg-color);
-        }
-        textarea::-webkit-scrollbar-thumb {
-            background: var(--border-color);
-            border-radius: 10px;
-        }
-        textarea::-webkit-scrollbar-thumb:hover {
-            background: var(--text-muted);
         }
 
         textarea {
@@ -152,10 +144,6 @@
             transition: background 0.2s;
         }
 
-        button.action-btn:active {
-            background-color: var(--primary-hover);
-        }
-
         .copy-sub-btn {
             width: 100%;
             background: var(--border-color);
@@ -180,136 +168,127 @@
             margin-top: 1.5rem;
             animation: fadeIn 0.4s ease-out;
         }
-
-        @media (max-width: 480px) {
-            .container { padding: 1.5rem; }
-        }
     </style>
 </head>
 <body>
-
-<div class="container" id="mainContainer">
-    <h2 id="mainTitle">安全密钥交换</h2>
-
-    <div class="section active" id="step1">
-        <label>第一步：设置你的私钥密码</label>
-        <div class="input-group">
-            <input type="password" id="privateKey" placeholder="输入私钥">
-            <button class="eye-btn" onclick="toggleEye('privateKey', this)">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>
-            </button>
+    <div class="container" id="mainContainer">
+        <h2 id="mainTitle">安全密钥交换</h2>
+        <div class="section active" id="step1">
+            <label>设置私钥密码，一定要记好</label>
+            <div class="input-group">
+                <input type="password" id="privateKey" placeholder="输入私钥">
+                <button class="eye-btn" onclick="toggleEye('privateKey', this)">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                        <line x1="1" y1="1" x2="23" y2="23"></line>
+                    </svg>
+                </button>
+            </div>
+            <button class="action-btn" onclick="generatePublic()">生成公钥</button>
         </div>
-        <button class="action-btn" onclick="generatePublic()">生成我的公钥</button>
-    </div>
-
-    <div class="section" id="step2">
-        <label>第二步：分享你的公钥给对方</label>
-        <textarea id="publicKey" readonly></textarea>
-        <button class="copy-sub-btn" onclick="copyAndShowNext('publicKey', this)">复制公钥分享给对方</button>
-
-        <div id="nextStepGroup">
-            <label>第三步：输入对方发送给你的公钥</label>
-            <textarea id="peerKey" style="background-color: var(--input-bg);" placeholder="在此粘贴对方的公钥数字"></textarea>
-            <button class="action-btn" onclick="computeShared()">计算最终加密密钥</button>
+        <div class="section" id="step2">
+            <label>分享公钥</label>
+            <textarea id="publicKey" readonly></textarea>
+            <button class="copy-sub-btn" onclick="copyAndShowNext('publicKey', this)">复制并分享给对方</button>
+            <div id="nextStepGroup">
+                <label>粘贴对方的公钥</label>
+                <textarea id="peerKey" style="background-color: var(--input-bg);" placeholder="粘贴对方的零宽度字符载荷"></textarea>
+                <button class="action-btn" onclick="computeShared()">生成最终密钥</button>
+            </div>
+        </div>
+        <div class="section" id="stepFinal">
+            <label>你的公钥</label>
+            <textarea id="finalMyPublic" style="opacity: 0.6; min-height: 60px;" readonly></textarea>
+            <button class="copy-sub-btn" onclick="copyText('finalMyPublic', this)">复制分享</button>
+            <label class="success-label" style="margin-top: 1.5rem;">最终密钥 (AES-256)，一定不能泄露</label>
+            <textarea id="sharedKey" class="result-box" readonly></textarea>
+            <button class="copy-sub-btn" style="color: var(--success-color); border-color: var(--success-color);" onclick="copyText('sharedKey', this)">复制最终密钥</button>
+            <button class="action-btn" style="background-color: var(--accent-bg); color: var(--text-muted); margin-top: 30px;" onclick="location.reload()">重置</button>
         </div>
     </div>
+    <script>
+        const p = BigInt("0xFFFFFFFFFFFFFFFFC90FDAA22168C234C4C6628B80DC1CD129024E088A67CC74020BBEA63B139B22514A08798E3404DDEF9519B3CD3A431B302B0A6DF25F14374FE1356D6D51C245E485B576625E7EC6F44C42E9A637ED6B0BFF5CB6F406B7EDEE386BFB5A899FA5AE9F24117C4B1FE649286651ECE45B3DC2007CB8A163BF0598DA48361C55D39A69163FA8FD24CF5F83655D23DCA3AD961C62F356208552BB9ED529077096966D670C354E4ABC9804F1746C08CA18217C32905E462E36CE3BE39E055872739302406A5123E163283B1910E63345839401ED59A0300E99A7EE136923C9341F287E9AD5199C50B34509F5F9419159146522F85B06456C361712A62174ED03036E73D541C1026D73");
+        const g = 2n;
+        const ZW = ['\u200c', '\u2060'];
 
-    <div class="section" id="stepFinal">
-        <label>你的公开密钥 (需要分享)</label>
-        <textarea id="finalMyPublic" style="opacity: 0.6; min-height: 60px;" readonly></textarea>
-        <button class="copy-sub-btn" onclick="copyText('finalMyPublic', this)">复制并分享公钥</button>
-        
-        <label class="success-label" style="margin-top: 1.5rem;">最终密钥 (绝对保密) 不允许分享</label>
-        <textarea id="sharedKey" class="result-box" readonly></textarea>
-        <button class="copy-sub-btn" style="color: var(--success-color); border-color: var(--success-color);" onclick="copyText('sharedKey', this)">复制最终密钥</button>
-        
-        <button class="action-btn" style="background-color: var(--accent-bg); color: var(--text-muted); margin-top: 30px;" onclick="location.reload()">清除并重新开始</button>
-    </div>
-</div>
+        function toZW(str) {
+            return str.split('').map(c => c.charCodeAt(0).toString(2).padStart(8, '0').split('').map(b => ZW[b]).join('')).join('');
+        }
 
-<script>
-const p = BigInt("0xFFFFFFFFFFFFFFFFC90FDAA22168C234C4C6628B80DC1CD129024E088A67CC74020BBEA63B139B22514A08798E3404DDEF9519B3CD3A431B302B0A6DF25F14374FE1356D6D51C245E485B576625E7EC6F44C42E9A637ED6B0BFF5CB6F406B7EDEE386BFB5A899FA5AE9F24117C4B1FE649286651ECE45B3DC2007CB8A163BF0598DA48361C55D39A69163FA8FD24CF5F83655D23DCA3AD961C62F356208552BB9ED529077096966D670C354E4ABC9804F1746C08CA18217C32905E462E36CE3BE39E055872739302406A5123E163283B1910E63345839401ED59A0300E99A7EE136923C9341F287E9AD5199C50B34509F5F9419159146522F85B06456C361712A62174ED03036E73D541C1026D73");
-const g = 2n;
+        function fromZW(zw) {
+            const bytes = zw.match(/.{8}/g) || [];
+            return bytes.map(b => String.fromCharCode(parseInt(b.split('').map(c => c === ZW[0] ? '0' : '1').join(''), 2))).join('');
+        }
 
-const eyeOpenPath = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>`;
-const eyeClosedPath = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>`;
+        function toggleEye(id, btn) {
+            const el = document.getElementById(id);
+            const open = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>`;
+            const close = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>`;
+            el.type = el.type === "password" ? "text" : "password";
+            btn.innerHTML = el.type === "password" ? close : open;
+        }
 
-function toggleEye(id, btn) {
-    const el = document.getElementById(id);
-    if (el.type === "password") {
-        el.type = "text";
-        btn.innerHTML = eyeOpenPath;
-    } else {
-        el.type = "password";
-        btn.innerHTML = eyeClosedPath;
-    }
-}
+        function copyText(id, btn) {
+            const val = document.getElementById(id).value;
+            if (!val) return;
+            navigator.clipboard.writeText(val).then(() => {
+                const oldText = btn.innerText;
+                btn.innerText = "已复制 √";
+                setTimeout(() => btn.innerText = oldText, 1500);
+            });
+        }
 
-function copyText(id, btn) {
-    const val = document.getElementById(id).value;
-    if (!val) return;
-    
-    navigator.clipboard.writeText(val).then(() => {
-        const originalText = btn.innerText;
-        btn.innerText = "已复制 √";
-        setTimeout(() => { btn.innerText = originalText; }, 1500);
-    });
-}
+        function copyAndShowNext(id, btn) {
+            copyText(id, btn);
+            document.getElementById("nextStepGroup").style.display = "block";
+        }
 
-function copyAndShowNext(id, btn) {
-    copyText(id, btn);
-    document.getElementById("nextStepGroup").style.display = "block";
-}
+        async function hashToBigInt(str) {
+            const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(str));
+            return BigInt("0x" + Array.from(new Uint8Array(buf)).map(x => x.toString(16).padStart(2, "0")).join(""));
+        }
 
-async function hashToBigInt(str){
-    const enc = new TextEncoder().encode(str);
-    const hash = await crypto.subtle.digest("SHA-256", enc);
-    const hex = [...new Uint8Array(hash)].map(x=>x.toString(16).padStart(2,"0")).join("");
-    return BigInt("0x"+hex);
-}
+        function modPow(base, exp, mod) {
+            let res = 1n;
+            base %= mod;
+            while (exp > 0) {
+                if (exp % 2n === 1n) res = (res * base) % mod;
+                exp /= 2n;
+                base = (base * base) % mod;
+            }
+            return res;
+        }
 
-function modPow(base, exp, mod){
-    let result = 1n;
-    base %= mod;
-    while(exp > 0){
-        if(exp % 2n === 1n) result = (result * base) % mod;
-        exp /= 2n;
-        base = (base * base) % mod;
-    }
-    return result;
-}
+        async function generatePublic() {
+            const k = document.getElementById("privateKey").value;
+            if (!k) return alert("请输入私钥");
+            const priv = await hashToBigInt(k);
+            const pub = modPow(g, priv, p).toString();
+            document.getElementById("publicKey").value = `)${toZW(pub)})`;
+            document.getElementById("step1").style.display = "none";
+            document.getElementById("step2").classList.add("active");
+        }
 
-async function generatePublic(){
-    const k1 = document.getElementById("privateKey").value;
-    if(!k1) { alert("私钥不能为空"); return; }
-    const priv = await hashToBigInt(k1);
-    const pub = modPow(g, priv, p);
-    document.getElementById("publicKey").value = pub.toString();
-    document.getElementById("step1").style.display = "none";
-    document.getElementById("step2").classList.add("active");
-}
-
-async function computeShared(){
-    const k1 = document.getElementById("privateKey").value;
-    const peerKeyVal = document.getElementById("peerKey").value.trim();
-    if(!peerKeyVal) { alert("请输入对方公钥"); return; }
-    try {
-        const peer = BigInt(peerKeyVal);
-        const priv = await hashToBigInt(k1);
-        const shared = modPow(peer, priv, p);
-        const enc = new TextEncoder().encode(shared.toString());
-        const hash = await crypto.subtle.digest("SHA-256", enc);
-        const key = [...new Uint8Array(hash)].map(x=>x.toString(16).padStart(2, "0")).join("");
-        
-        document.getElementById("finalMyPublic").value = document.getElementById("publicKey").value;
-        document.getElementById("sharedKey").value = key;
-        
-        document.getElementById("step2").style.display = "none";
-        document.getElementById("mainTitle").innerText = "密钥交换完成";
-        document.getElementById("stepFinal").classList.add("active");
-    } catch (e) { alert("公钥格式错误，请确保输入的是纯数字"); }
-}
-</script>
-
+        async function computeShared() {
+            const k = document.getElementById("privateKey").value;
+            const input = document.getElementById("peerKey").value.trim();
+            const match = input.match(/\)([\u200c\u2060]+)\)/);
+            if (!match) return alert("无效的载荷格式");
+            try {
+                const peer = BigInt(fromZW(match[1]));
+                const priv = await hashToBigInt(k);
+                const shared = modPow(peer, priv, p).toString();
+                const hashBuf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(shared));
+                const finalKey = Array.from(new Uint8Array(hashBuf)).map(x => x.toString(16).padStart(2, "0")).join("");
+                document.getElementById("finalMyPublic").value = document.getElementById("publicKey").value;
+                document.getElementById("sharedKey").value = finalKey;
+                document.getElementById("step2").style.display = "none";
+                document.getElementById("mainTitle").innerText = "传递成功";
+                document.getElementById("stepFinal").classList.add("active");
+            } catch (e) {
+                alert("计算失败，请确认载荷正确");
+            }
+        }
+    </script>
 </body>
 </html>
